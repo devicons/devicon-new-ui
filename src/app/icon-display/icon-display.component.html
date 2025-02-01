@@ -27,7 +27,7 @@
       id="grid-box"
       class="flex flex-col items-center relative rounded-xl p-2 m-2 w-40 h-40 transition-all duration-200 hover:cursor-pointer hover:hover-color sm:p-6 sm:pb-12 sm:m-6 sm:w-auto sm:h-auto"
     >
-      <i class="text-[116px] sm:text-9xl sm:w-32 sm:h-32 devicon-{{ icon.name }}-{{ icon.css[0] }}"></i>
+      <i class="text-[116px] sm:text-9xl sm:w-32 sm:h-32 devicon-{{ icon.name }}-{{ icon?.version?.font?.[0] ?? 'plain' }}"></i>
       <p class="absolute bottom-2 w-max font-semibold text-base sm:mt-4 sm:bottom-3">
         {{ icon.title }}
       </p>
