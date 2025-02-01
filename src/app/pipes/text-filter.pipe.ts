@@ -7,7 +7,6 @@ export class TextFilterPipe implements PipeTransform {
   transform(icons: any[], search: string): any[] {
     return icons.filter(
       (icon) =>
-        icon.title.toLowerCase().includes(search.toLowerCase()) ||
         icon.name.toLowerCase().includes(search.toLowerCase())
     );
   }

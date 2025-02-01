@@ -1,9 +1,15 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
-import { icons, IconData } from 'src/data';
+import { HttpClient } from '@angular/common/http';
 import { DataService } from '../services/data.service';
 
-// sort icons by title
-icons.sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }));
+interface IconData {
+  name: string;
+  tags: string[];
+  versions: {
+    svg: string[];
+    font: string[];
+  };
+}
 
 @Component({
   selector: 'app-icon-display',
@@ -11,7 +17,7 @@ icons.sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' 
   styleUrls: ['./icon-display.component.scss']
 })
 export class IconDisplayComponent implements OnInit {
-  icons: IconData[] = icons;
+  icons: IconData[] = [];
   textSearch = '';
   tagSearch = 'Filter by tag';
   tagChoices: string[];
@@ -28,7 +34,7 @@ export class IconDisplayComponent implements OnInit {
   cssSelected = true;
 
   // eslint-disable-next-line no-unused-vars
-  constructor(private data: DataService, private renderer: Renderer2) {}
+  constructor(private data: DataService, private renderer: Renderer2, private http: HttpClient) {}
 
   ngOnInit() {
     this.tagChoices = [...new Set(this.icons.flatMap((obj: IconData) => obj.tags))].sort();
@@ -39,6 +45,20 @@ export class IconDisplayComponent implements OnInit {
     this.data.toggleColorSwitch.subscribe((v: boolean) => (this.toggleColorSwitch = v));
     this.data.toggleWordmarkSwitch.subscribe((v: boolean) => (this.toggleWordmarkSwitch = v));
     this.data.cssSelected.subscribe((v: boolean) => (this.cssSelected = v));
+    this.fetchIcons();
+  }
+
+    fetchIcons() {
+    const iconsUrl = 'https://raw.githubusercontent.com/devicons/devicon/master/devicon.json';
+    this.http.get<IconData[]>(iconsUrl).subscribe(
+      (data: IconData[]) => {
+        this.icons = data.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+        this.tagChoices = [...new Set(this.icons.flatMap((obj: IconData) => obj.tags))].sort();
+      },
+      (error) => {
+        console.error('Error fetching icons:', error);
+      }
+    );
   }
 
   handleDropdownDisplay() {
@@ -54,9 +74,7 @@ export class IconDisplayComponent implements OnInit {
 
     this.data.changeSelectedIcon(icon);
     this.data.changeSelectedIconName(icon.name);
-    this.data.changeSelectedIconTitle(icon.title);
 
-    this.data.updateDefaultIconVersions(this.cssSelected ? this.selectedIcon.css : this.selectedIcon.svg);
     this.data.updateDefaultIconVersion(this.selectedIconVersions);
     this.data.updateCodeSnippet(
       this.toggleColorSwitch ? ' colored' : '',
